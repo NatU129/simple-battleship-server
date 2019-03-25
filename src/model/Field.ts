@@ -1,4 +1,9 @@
 import Fleet from './Fleet';
+import MongoConnector from './db/MongoConnector';
+
+const randomstring = require("randomstring");
+
+const connector = new MongoConnector();
 
 const fleet = {
     battleship: 1,
@@ -14,6 +19,7 @@ export default class Field {
     public fleet: Fleet;
     public totalShot: number;
     public missedShot: number;
+    public no: string;
 
     constructor(size: [number, number]) {
         //initiate area
@@ -25,14 +31,17 @@ export default class Field {
             }
         }
 
+        this.no = randomstring.generate(10);
+
         this.totalShot = 0;
         this.missedShot = 0;
 
         this.fleet = this.addFleet(fleet, size);
+        this.fleet.saveNew();
     }
 
     public addFleet(fleet: { [s: string]: number; }, size: [number, number]) {
-        return new Fleet(fleet, size);
+        return new Fleet(fleet, size, this.no);
     }
 
     public getAttacked(posX: number, posY: number) {
@@ -49,6 +58,12 @@ export default class Field {
         } else {
             this.attackedArea[posY][posX] = 'x';
         }
+
+        connector.update('fleet', {
+            fieldNo: this.no,
+        }, {attackedArea: this.attackedArea}, (result) => {
+            console.log('update fleet position');
+        });
 
         console.log('Field status\n' +
             this.attackedArea.map((t1) => {
@@ -68,5 +83,15 @@ export default class Field {
             totalShot: this.totalShot,
             missedShot: this.missedShot
         };
+    }
+
+    public saveNew(){
+        const connector = new MongoConnector();
+        connector.insert('field', {
+            attackedArea: this.attackedArea,
+            fieldNo: this.no
+        }, (result) => {
+            console.log('add a new field to the database');
+        });
     }
 }

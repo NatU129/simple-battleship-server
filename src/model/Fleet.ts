@@ -1,17 +1,29 @@
 import Ship from "./Ship";
+import MongoConnector from './db/MongoConnector';
+
+const connector = new MongoConnector();
 
 export default class Fleet {
     //Is ship allow to be placed next to each other? default is no
     private allowAdjacent = process.env.allow_adjacent || false;
     private ships: Ship[] = [];
     private position: string[][];
+    public fieldNo: string;
 
-    constructor(ships: { [key: string]: number; }, size: [number, number]) {
-        for (let shipType of Object.keys(ships)) {
-            for (let i = 0; i < ships[shipType]; i++) {
-                this.ships.push(new Ship(shipType, i));
+    constructor(ships: { [key: string]: number; }, size: [number, number], no: string) {
+        this.fieldNo = no;
+
+        connector.get('ship', { fieldNo: this.fieldNo }, (result) => {
+            if (result.length > 0) {
+                this.ships = result;
+            } else {
+                for (let shipType of Object.keys(ships)) {
+                    for (let i = 0; i < ships[shipType]; i++) {
+                        this.ships.push(new Ship(shipType, i, no));
+                    }
+                }
             }
-        }
+        })
 
         //initiate position
         this.position = [];
@@ -33,6 +45,12 @@ export default class Fleet {
                     } else {
                         this.position[posY + i][posX] = ship.getType() + ship.no;
                     }
+
+                    connector.update('fleet', {
+                        fieldNo: this.fieldNo,
+                    }, {position: this.position}, (result) => {
+                        console.log('update fleet position');
+                    });
                 }
                 ship.isPlaced = true;
 
@@ -155,5 +173,14 @@ export default class Fleet {
             result += remainingShips[shipType];
         }
         return result === 0;
+    }
+
+    public saveNew() {
+        connector.insert('fleet', {
+            position: this.position,
+            fieldNo: this.fieldNo
+        }, (result) => {
+            console.log('add a new fleet to the database');
+        });
     }
 }

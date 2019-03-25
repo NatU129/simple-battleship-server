@@ -18,10 +18,13 @@
   },
   "homepage": "https://github.com/NatU129/simple-battleship-server#readme",
   "dependencies": {
+    "@types/mongodb": "^3.1.22",
     "@types/node": "^11.11.6",
     "koa": "^2.7.0",
     "koa-better-router": "^2.1.1",
-    "koa-body": "^4.1.0"
+    "koa-body": "^4.1.0",
+    "mongodb": "^3.2.2",
+    "randomstring": "^1.1.5"
   },
   "devDependencies": {
     "mocha": "5.2.0",

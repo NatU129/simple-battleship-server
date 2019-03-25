@@ -12,7 +12,7 @@ export default class Game{
     /**
      * @returns return current game
      */
-    public static getGame(){
+    public static getSelf(){
         if(!this.myGame) this.myGame = new Game();
 
         return this.myGame;

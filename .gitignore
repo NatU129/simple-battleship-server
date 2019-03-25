@@ -64,4 +64,4 @@ typings/
 .vscode
 
 # transpiled files
-src/model/*js
+src/model/**/*js

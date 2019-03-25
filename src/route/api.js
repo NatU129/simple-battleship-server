@@ -1,11 +1,13 @@
 const router = require('koa-better-router')({ prefix: '/api' });
 const Game = require('../model/Game').default;
 
+const game = Game.getSelf();
+
 module.exports = [
 
     //get game status
     router.createRoute('GET', '/', (ctx, next) => {
-        const game = Game.getGame();
+        
         ctx.body = game.ocean.getFieldStatus();
 
         return next();
@@ -15,7 +17,6 @@ module.exports = [
     router.createRoute('POST', '/reset', (ctx, next) => {
         const fno = ctx.request.body.fno;
 
-        const game = Game.getGame();
         if (game.ocean.clear(fno)) {
             ctx.body = 'reset successfully';
         } else {
@@ -32,7 +33,6 @@ module.exports = [
         const pos = ctx.request.body.pos;
         const direction = ctx.request.body.direction;
 
-        const game = Game.getGame();
         try {
             ctx.body = game.ocean.getField(fno).fleet.placeShip(type, pos[0], pos[1], direction);
         } catch (error) {
@@ -47,7 +47,6 @@ module.exports = [
         const fno = ctx.request.body.fno;
         const pos = ctx.request.body.pos;
 
-        const game = Game.getGame();
         try {
             ctx.body = game.ocean.getField(fno).getAttacked(pos[0], pos[1]);
         } catch (error) {
